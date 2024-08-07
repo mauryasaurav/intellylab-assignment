@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauryasaurav/server/intellylab-assignment/domain/dto"
-	"github.com/mauryasaurav/server/intellylab-assignment/domain/interfaces"
+	"github.com/mauryasaurav/intellylab-assignment/server/domain/dto"
+	"github.com/mauryasaurav/intellylab-assignment/server/domain/interfaces"
 )
 
 type userHandler struct {

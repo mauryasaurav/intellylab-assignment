@@ -14,7 +14,7 @@ GORM, Clean Architecture, CRUD Api, postres, jwt-go
 
 A little intro about the installation. 
 ```
-$ https://github.com/mauryasaurav/server/intellylab-assignment.git
+$ https://github.com/mauryasaurav/intellylab-assignment/server.git
 $ cd go-authentication
 $ go mod tidy
 $ go run cmd/main.go

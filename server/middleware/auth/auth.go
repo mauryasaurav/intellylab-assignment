@@ -8,7 +8,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/mauryasaurav/server/intellylab-assignment/utils/constants"
+	"github.com/mauryasaurav/intellylab-assignment/server/utils/constants"
 )
 
 // AuthRequired is a simple middleware to check the session

@@ -1,10 +1,10 @@
-package repozitory
+package repository
 
 import (
 	"context"
 
-	"github.com/mauryasaurav/server/intellylab-assignment/domain/entity"
-	"github.com/mauryasaurav/server/intellylab-assignment/domain/interfaces"
+	"github.com/mauryasaurav/intellylab-assignment/server/domain/entity"
+	"github.com/mauryasaurav/intellylab-assignment/server/domain/interfaces"
 	"gorm.io/gorm"
 )
 
@@ -16,7 +16,7 @@ func NewUserRepository(db *gorm.DB) interfaces.UserRepository {
 	return &userRepository{db: db}
 }
 
-func (r *userRepository) CreateUsers(user entity.UserSchema) (*entity.UserSchema, error) {
+func (r *userRepository) CreateUser(user entity.UserSchema) (*entity.UserSchema, error) {
 	result := r.db.WithContext(context.Background()).Create(&user)
 	return &user, result.Error
 }
@@ -31,4 +31,10 @@ func (r *userRepository) UpdateByEmail(email string, user entity.UserSchema) err
 	result := r.db.WithContext(context.Background()).Where("email = ?", email).Updates(user)
 	result.Scan(&user)
 	return result.Error
+}
+
+func (r *userRepository) GetAllUsers() (*[]entity.UserSchema, error) {
+	var user []entity.UserSchema
+	result := r.db.WithContext(context.Background()).Model(&entity.UserSchema{}).Find(&user).Limit(1)
+	return &user, result.Error
 }

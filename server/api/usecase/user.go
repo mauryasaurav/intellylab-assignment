@@ -4,10 +4,10 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauryasaurav/server/intellylab-assignment/domain/dto"
-	"github.com/mauryasaurav/server/intellylab-assignment/domain/entity"
-	"github.com/mauryasaurav/server/intellylab-assignment/domain/interfaces"
-	"github.com/mauryasaurav/server/intellylab-assignment/middleware/jwt"
+	"github.com/mauryasaurav/intellylab-assignment/server/domain/dto"
+	"github.com/mauryasaurav/intellylab-assignment/server/domain/entity"
+	"github.com/mauryasaurav/intellylab-assignment/server/domain/interfaces"
+	"github.com/mauryasaurav/intellylab-assignment/server/middleware/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -27,7 +27,7 @@ func (u *userUsecase) CreateUserHandler(ctx *gin.Context, req *dto.UserValidator
 		return err
 	}
 
-	if _, err := u.userRepo.CreateUsers(entity.UserSchema{
+	if _, err := u.userRepo.CreateUser(entity.UserSchema{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		Email:     req.Email,

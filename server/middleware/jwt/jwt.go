@@ -5,7 +5,7 @@ import (
 
 	jwt2 "github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
-	"github.com/mauryasaurav/server/intellylab-assignment/utils/constants"
+	"github.com/mauryasaurav/intellylab-assignment/server/utils/constants"
 )
 
 type Claims struct {
@@ -13,7 +13,7 @@ type Claims struct {
 	jwt2.StandardClaims
 }
 
-func GenerateJWTToken(userID uuid.UUID, role string) string {
+func GenerateJWTToken(userID uuid.UUID, role int64) string {
 	token := jwt2.New(jwt2.SigningMethodHS256)
 	claims := token.Claims.(jwt2.MapClaims)
 	claims["user_id"] = userID
