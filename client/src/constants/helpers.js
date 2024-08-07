@@ -1,5 +1,4 @@
 export const handlerErrors = (err) => {
-  console.log("err===+>", err)
   if (!!err?.response?.data?.error) {
     return err?.response?.data?.error;
   }
@@ -30,13 +29,4 @@ export const getFullName = (data) => {
 
 export const truncate = (str, len, cutLen) => {
   return str?.length > len ? str.substring(0, cutLen) + "..." : str;
-};
-
-export const formatWithLabel = (data = []) => {
-  return data.map((l) => {
-    return {
-      label: l.name,
-      value: l?._id,
-    };
-  });
 };

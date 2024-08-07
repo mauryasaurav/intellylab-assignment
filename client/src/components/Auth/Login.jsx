@@ -1,5 +1,5 @@
 import React, { useContext, useEffect } from "react";
-import { Flex, Heading, Stack } from "@chakra-ui/react";
+import { Button, Flex, HStack, Heading, Stack } from "@chakra-ui/react";
 import { Form, Formik } from "formik";
 import { useNavigate } from "react-router-dom";
 import useToastHook from "../../components/Common/Toast";
@@ -63,6 +63,16 @@ const Login = () => {
                       name={"password"}
                     />
                   </Stack>
+                  <HStack justify="space-between">
+                    <Button
+                      onClick={() => navigate(`/register`)}
+                      variant="link"
+                      colorScheme="blue"
+                      size="lg"
+                    >
+                      Register?
+                    </Button>
+                  </HStack>
                   <AppButton loading={loading} label="Sign in" />
                 </Stack>
               </Form>

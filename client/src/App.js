@@ -6,6 +6,7 @@ import { ChakraProvider } from "@chakra-ui/react";
 import { ProtectedRoute } from "./context/ProtectedRoute";
 import PageNotFound from "./components/Common/PageNotFound";
 import Dashboard from "./components/Dashboard";
+import Register from "./components/Auth/Register";
 
 function App() {
   return (
@@ -13,7 +14,7 @@ function App() {
       <ChakraProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/register" element={<Login />} />
+            <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
             <Route element={<ProtectedRoute />}>
               <Route element={<Layout />}>

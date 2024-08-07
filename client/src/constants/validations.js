@@ -52,6 +52,9 @@ export const forgotPasswordSchema = Yup.object().shape({
 });
 
 export const resetPasswordSchema = Yup.object().shape({
+  first_name: Yup.string().required("First Name is required field"),
+  last_name: Yup.string().required("Last Name is required field"),
+  email: Yup.string().email("Invalid Email").required("Email is required"),
   password: Yup.string()
     .matches(/[a-z]/, "Password must contain at least one lowercase letter")
     .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
