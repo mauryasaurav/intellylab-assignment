@@ -18,4 +18,5 @@ $ https://github.com/mauryasaurav/server/intellylab-assignment.git
 $ cd go-authentication
 $ go mod tidy
 $ go run cmd/main.go
+
 ```
