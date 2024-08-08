@@ -26,7 +26,7 @@ func (h *userHandler) CreateUser(ctx *gin.Context) {
 		return
 	}
 
-	err := h.userUsecase.CreateUserHandler(ctx, created)
+	_, err := h.userUsecase.CreateUserHandler(ctx, created)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -57,7 +57,7 @@ func (h *userHandler) LoginUser(ctx *gin.Context) {
 		return
 	}
 
-	err := h.userUsecase.LoginUserHandler(ctx, *req)
+	_, err := h.userUsecase.LoginUserHandler(ctx, *req)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

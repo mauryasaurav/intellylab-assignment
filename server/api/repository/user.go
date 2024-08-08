@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/mauryasaurav/intellylab-assignment/server/domain/entity"
 	"github.com/mauryasaurav/intellylab-assignment/server/domain/interfaces"
@@ -18,6 +19,7 @@ func NewUserRepository(db *gorm.DB) interfaces.UserRepository {
 
 func (r *userRepository) CreateUser(user entity.UserSchema) (*entity.UserSchema, error) {
 	result := r.db.WithContext(context.Background()).Create(&user)
+	fmt.Println(result.Error)
 	return &user, result.Error
 }
 

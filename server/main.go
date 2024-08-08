@@ -26,7 +26,15 @@ func main() {
 		panic("dbConn not connected")
 	}
 
-	dbConn.AutoMigrate(&entity.UserSchema{})
+	err = dbConn.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"").Error
+	if err != nil {
+		fmt.Println("Error creating extension:", err)
+	}
+
+	err = dbConn.AutoMigrate(&entity.UserSchema{})
+	if err != nil {
+		fmt.Println("Error during migration:", err)
+	}
 
 	route := gin.Default()
 
@@ -38,7 +46,6 @@ func main() {
 		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},            // Allow these methods
 		AllowHeaders: []string{"Origin", "Content-Type", "Authorization"}, // Allow these headers
 	}))
-
 
 	store := cookie.NewStore([]byte("secret"))
 	route.Use(sessions.Sessions("mysession", store))

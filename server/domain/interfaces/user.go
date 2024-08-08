@@ -8,8 +8,8 @@ import (
 
 type UserUsecase interface {
 	AuthenticationUser(ctx *gin.Context, oldPassword string, currentPassword string) bool
-	CreateUserHandler(ctx *gin.Context, request *dto.UserValidator) error
-	LoginUserHandler(ctx *gin.Context, request dto.UserLoginValidator) error
+	CreateUserHandler(ctx *gin.Context, request *dto.UserValidator) (*entity.UserSchema, error)
+	LoginUserHandler(ctx *gin.Context, request dto.UserLoginValidator) (*entity.UserSchema, error)
 	UpdateUserHandler(ctx *gin.Context, request dto.UserUpdateValidator) error
 }
 
