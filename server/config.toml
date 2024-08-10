@@ -1,0 +1,10 @@
+[env]
+port = "5001"
+
+[postgres]
+host     = "localhost"
+port     = 5432
+user     = "postgres"
+password = "password"
+dbname   = "intellylab_assignment3"
+sslmode  = "disable"

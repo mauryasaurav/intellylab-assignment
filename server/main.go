@@ -2,75 +2,59 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
-	handler "github.com/mauryasaurav/server/intellylab-assignment/api/http"
-	"github.com/mauryasaurav/server/intellylab-assignment/api/repozitory"
-	"github.com/mauryasaurav/server/intellylab-assignment/api/usecase"
-	"github.com/mauryasaurav/server/intellylab-assignment/domain/entity"
-	"github.com/mauryasaurav/server/intellylab-assignment/middleware/auth"
-	"github.com/mauryasaurav/server/intellylab-assignment/utils/constants"
-
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	_ "github.com/lib/pq"
+	handler "github.com/mauryasaurav/intellylab-assignment/server/api/http"
+	"github.com/mauryasaurav/intellylab-assignment/server/api/repository"
+	"github.com/mauryasaurav/intellylab-assignment/server/api/usecase"
+	"github.com/mauryasaurav/intellylab-assignment/server/db"
+	"github.com/mauryasaurav/intellylab-assignment/server/middleware/auth"
+	"github.com/pelletier/go-toml"
 )
 
 func main() {
-
-	dbConn, err := gorm.Open(postgres.Open(constants.DB_URL), &gorm.Config{})
-
+	config, err := toml.LoadFile("config.toml")
 	if err != nil {
-		fmt.Println(err.Error())
-		panic("dbConn not connected")
+		fmt.Fprintf(os.Stderr, "[ERROR] loading toml file: %+v\n", err)
+		return
 	}
 
-	// dbConn.Debug()
-	dbConn.AutoMigrate(&entity.CategorySchema{})
-	dbConn.AutoMigrate(&entity.UserSchema{})
-	dbConn.AutoMigrate(&entity.QuestionSchema{})
+	dbConn, err := db.SetupAndConnectDB(config)
+	if err != nil {
+		log.Fatal("Failed to connect to the database:", err)
+	}
 
 	route := gin.Default()
 
+	store := cookie.NewStore([]byte("secret"))
+	route.Use(sessions.Sessions("intellylabsession", store))
+
 	route.Use(auth.JSONMiddleware())
 
-	store := cookie.NewStore([]byte("secret"))
-	route.Use(sessions.Sessions("mysession", store))
+	// CORS Configuration
+	route.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"http://localhost:3000"},                   // Allow this origin
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE"},            // Allow these methods
+		AllowHeaders: []string{"Origin", "Content-Type", "Authorization"}, // Allow these headers
+	}))
 
 	api := route.Group("/api/")
 
-	// public
-	publicRoute := api.Group("/public")
-	publicRepo := repozitory.NewPublicRepository(dbConn)
-	publicUsecase := usecase.NewPublicUsecase(publicRepo)
-	handler.NewPublicHandler(publicRoute, publicUsecase)
-
 	// user
 	userRoute := api.Group("/user")
-	userRepo := repozitory.NewUserRepository(dbConn)
+	userRepo := repository.NewUserRepository(dbConn)
 	userUsecase := usecase.NewUserUsecase(userRepo)
 	handler.NewUserHandler(userRoute, userUsecase)
 
-	// private
-	private := api.Group("/private")
-	private.Use(auth.AuthRequired)
-	{
-		// Category
-		categoryRepo := repozitory.NewCategoryRepository(dbConn)
-		categoryUsecase := usecase.NewCategoryUsecase(categoryRepo)
-		handler.NewCategoryHandler(private, categoryUsecase)
-
-		// Question
-		questionRepo := repozitory.NewQuestionRepository(dbConn)
-		questionUsecase := usecase.NewQuestionUsecase(questionRepo)
-		handler.NewQuestionHandler(private, questionUsecase)
-	}
-
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8000"
+		port = config.Get("env.port").(string)
 	}
 
 	route.Run(":" + port)

@@ -6,9 +6,9 @@ import (
 	"github.com/google/uuid"
 )
 
-func GetUserDeatil(c *gin.Context) (uuid.UUID, string) {
+func GetUserDeatil(c *gin.Context) (string, uuid.UUID) {
 	session := sessions.Default(c)
+	email := session.Get("email")
 	userId := session.Get("user_id")
-	role := session.Get("role")
-	return uuid.MustParse(userId.(string)), role.(string)
+	return email.(string), uuid.MustParse(userId.(string))
 }

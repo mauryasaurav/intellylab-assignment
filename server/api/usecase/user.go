@@ -1,13 +1,13 @@
 package usecase
 
 import (
-	"net/http"
+	"errors"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mauryasaurav/server/intellylab-assignment/domain/dto"
-	"github.com/mauryasaurav/server/intellylab-assignment/domain/entity"
-	"github.com/mauryasaurav/server/intellylab-assignment/domain/interfaces"
-	"github.com/mauryasaurav/server/intellylab-assignment/middleware/jwt"
+	"github.com/mauryasaurav/intellylab-assignment/server/domain/dto"
+	"github.com/mauryasaurav/intellylab-assignment/server/domain/entity"
+	"github.com/mauryasaurav/intellylab-assignment/server/domain/interfaces"
+	"github.com/mauryasaurav/intellylab-assignment/server/middleware/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -21,55 +21,76 @@ func NewUserUsecase(userRepo interfaces.UserRepository) interfaces.UserUsecase {
 	}
 }
 
-func (u *userUsecase) CreateUserHandler(ctx *gin.Context, req *dto.UserValidator) error {
-	hashedPass, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
-	if err != nil {
-		return err
+func (u *userUsecase) CreateUserHandler(ctx *gin.Context, req *dto.UserValidator) (*entity.UserSchema, string, error) {
+	user, _ := u.userRepo.FindByEmail(req.Email)
+	if user.Email != "" {
+		return nil, "", errors.New("user already exist with email")
 	}
 
-	if _, err := u.userRepo.CreateUsers(entity.UserSchema{
+	hashedPass, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, "", err
+	}
+
+	data, err := u.userRepo.CreateUser(entity.UserSchema{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		Email:     req.Email,
 		Password:  string(hashedPass),
-	}); err != nil {
-		return err
+		Role:      req.Role,
+	})
+
+	if err != nil {
+		return nil, "", err
 	}
 
-	return nil
+	jwtToken := jwt.GenerateJWTToken(data.Id, data.Role, data.Email)
+	return data, jwtToken, err
 }
 
 func (u *userUsecase) UpdateUserHandler(ctx *gin.Context, req dto.UserUpdateValidator) error {
-	err := u.userRepo.UpdateByEmail(req.Email, entity.UserSchema{
+	return u.userRepo.UpdateByEmail(req.Email, entity.UserSchema{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		Email:     req.Email,
 	})
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
-func (u *userUsecase) LoginUserHandler(ctx *gin.Context, req dto.UserLoginValidator) error {
+func (u *userUsecase) DeleteUserHandler(ctx *gin.Context, id string) error {
+	return u.userRepo.DeleteUserById(id)
+}
+
+func (u *userUsecase) LoginUserHandler(ctx *gin.Context, req dto.UserLoginValidator) (*entity.UserSchema, string, error) {
 	user, err := u.userRepo.FindByEmail(req.Email)
-	if user == nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "User not found "})
-		return err
+	if user.Email == "" {
+		return nil, "", errors.New("user not found with given email id")
 	}
 
 	valid := u.AuthenticationUser(ctx, req.Password, user.Password)
-
 	if !valid {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Password don't match."})
-		return nil
+		return nil, "", errors.New("password don't match")
 	}
 
-	jwtToken := jwt.GenerateJWTToken(user.Id, user.Role)
-	ctx.JSON(http.StatusOK, gin.H{"message": "user login successfully", "token": jwtToken})
-	return nil
+	jwtToken := jwt.GenerateJWTToken(user.Id, user.Role, user.Email)
+	return user, jwtToken, err
+}
+
+func (u *userUsecase) ListUsersHandler(ctx *gin.Context) ([]entity.UserSchema, error) {
+	data, err := u.userRepo.GetAllUsers()
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
+}
+
+func (u *userUsecase) GetUserByEmailHandler(ctx *gin.Context, email string) (*entity.UserSchema, error) {
+	data, err := u.userRepo.FindByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+
+	return data, nil
 }
 
 func (u *userUsecase) AuthenticationUser(ctx *gin.Context, oldPassword string, currentPassword string) bool {

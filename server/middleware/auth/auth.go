@@ -8,7 +8,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"github.com/mauryasaurav/server/intellylab-assignment/utils/constants"
+	"github.com/mauryasaurav/intellylab-assignment/server/utils/constants"
 )
 
 // AuthRequired is a simple middleware to check the session
@@ -30,8 +30,7 @@ func AuthRequired(c *gin.Context) {
 		return
 	}
 
-	claims, valid := extractClaims(token[1])
-
+	claims, valid := ExtractJWTClaims(token[1])
 	if !valid {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 		return
@@ -39,29 +38,29 @@ func AuthRequired(c *gin.Context) {
 
 	session := sessions.Default(c)
 
-	role, ok := claims["role"].(string)
-	if !ok {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "role not found"})
-		return
-	}
-
 	userId, ok := claims["user_id"].(string)
 	if !ok {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "user_id not found"})
 		return
 	}
 
-	session.Set("role", role)
+	email, ok := claims["email"].(string)
+	if !ok {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "email not found"})
+		return
+	}
+
+	session.Set("role", 1)
 	session.Set("user_id", userId)
+	session.Set("email", email)
 	session.Save()
 	c.Next()
 }
 
-func extractClaims(tokenStr string) (jwt.MapClaims, bool) {
+func ExtractJWTClaims(tokenStr string) (jwt.MapClaims, bool) {
 	hmacSecretString := constants.SECRET_KEY
 	hmacSecret := []byte(hmacSecretString)
 	token, err := jwt.Parse(tokenStr, func(token *jwt.Token) (interface{}, error) {
-		// check token signing method etc
 		return hmacSecret, nil
 	})
 

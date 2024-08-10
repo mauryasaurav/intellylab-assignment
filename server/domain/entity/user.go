@@ -15,5 +15,5 @@ type UserSchema struct {
 	LastName  string    `json:"last_name"`
 	Email     string    `json:"email"`
 	Password  string    `json:"password"`
-	Role      string    `json:"role" gorm:"default=user"`
+	Role      int64     `json:"role" gorm:"default=1"`
 }
